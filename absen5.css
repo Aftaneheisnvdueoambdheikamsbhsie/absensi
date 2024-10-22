@@ -1,37 +1,38 @@
-body {
-    font-family: Arial, sans-serif;
+/* Existing styles... */
+
+.burger-menu {
+    cursor: pointer;
+    font-size: 24px;
+    margin: 15px;
 }
 
-h1 {
-    text-align: center;
-    color: #333;
+.nav-hidden {
+    display: none;
 }
 
-section {
-    margin: 20px;
+nav {
+    position: absolute;
+    background-color: #007BFF;
+    top: 50px;
+    right: 0;
+    width: 150px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 20px 0;
-}
-
-table, th, td {
-    border: 1px solid #ccc;
-    padding: 8px;
-    text-align: center;
-}
-
-table th {
-    background-color: #f4f4f4;
-}
-
-input[type="file"] {
-    margin-bottom: 20px;
-}
-
-button {
+nav ul {
+    list-style: none;
     padding: 10px;
-    margin-bottom: 20px;
 }
+
+nav li {
+    padding: 10px;
+    color: white;
+    cursor: pointer;
+}
+
+nav li:hover {
+    background-color: #0056b3;
+}
+
+/* Existing styles... */
