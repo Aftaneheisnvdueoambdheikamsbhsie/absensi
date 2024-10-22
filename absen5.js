@@ -1,7 +1,6 @@
 // Variabel untuk menyimpan data dan sheet yang dipilih
 let attendanceData = [];
 let currentSheetName = ''; // Nama sheet yang dipilih
-let randomData = []; // Data acak yang akan digunakan untuk kehadiran
 
 // Fungsi untuk membaca file Excel
 document.getElementById('upload').addEventListener('change', handleFile, false);
@@ -89,11 +88,6 @@ function renderTable() {
         thead.appendChild(th);
     });
 
-    // Tambahkan kolom baru untuk kehadiran
-    var th = document.createElement('th');
-    th.innerText = "Kehadiran";
-    thead.appendChild(th);
-
     // Tambahkan baris data
     for (var i = 1; i < attendanceData.length; i++) {
         var row = document.createElement('tr');
@@ -102,29 +96,20 @@ function renderTable() {
             td.innerText = cell;
             row.appendChild(td);
         });
-
-        // Tambahkan status kehadiran
-        var statusTd = document.createElement('td');
-        const name = attendanceData[i][0];
-        const className = attendanceData[i][1];
-        const isPresent = checkAttendance(name, className);
-        statusTd.innerText = isPresent ? 'P' : ''; // Gunakan karakter 'P' atau simbol Wingdings
-        row.appendChild(statusTd);
-
         tbody.appendChild(row);
     }
 }
 
-// Fungsi untuk memeriksa kehadiran berdasarkan data acak
-function checkAttendance(name, className) {
-    return randomData.some(entry => entry[0] === name && entry[1] === className);
+// Fungsi untuk mencocokkan string secara fuzzy
+function fuzzyMatch(str1, str2) {
+    return str1.toLowerCase().includes(str2.toLowerCase()) || str2.toLowerCase().includes(str1.toLowerCase());
 }
 
-// Fungsi untuk mengupdate data absensi secara acak
+// Fungsi untuk mengupdate data absensi secara acak dengan pencocokan nama dan kelas
 function updateAttendance() {
     const rawData = document.getElementById('randomData').value.trim();
     const lines = rawData.split('\n');
-    randomData = [];
+    const newEntries = [];
 
     // Proses data acak yang diinput
     lines.forEach(line => {
@@ -132,11 +117,30 @@ function updateAttendance() {
         const name = parts[0];
         const className = parts[1]; // Anggap kelas adalah kata kedua
         if (name && className) {
-            randomData.push([name, className]);
+            newEntries.push([name, className]);
         }
     });
 
-    renderTable(); // Render tabel yang sudah diupdate
+    // Tambahkan atau update data absensi yang baru dengan fuzzy match
+    newEntries.forEach(row => {
+        let updated = false;
+        for (let i = 1; i < attendanceData.length; i++) {
+            if (fuzzyMatch(attendanceData[i][0], row[0]) && fuzzyMatch(attendanceData[i][1], row[1])) {
+                attendanceData[i].push('P'); // Tandai kehadiran dengan "P"
+                updated = true;
+                break;
+            }
+        }
+        if (!updated) {
+            attendanceData.push([row[0], row[1], 'P']); // Tambah entry baru dengan status "P"
+        }
+    });
+
+    // Render tabel yang sudah diupdate
+    renderTable();
+
+    // Tampilkan notifikasi berhasil
+    alert('Update attendance berhasil!');
 }
 
 // Fungsi untuk men-download file Excel yang sudah di-update
