@@ -4,32 +4,50 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Attendance Tracker with Excel</title>
-    <link rel="stylesheet" href="absen5.css">
+    <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 </head>
 <body>
     <header>
-        <h1>Attendance Tracker with Excel</h1>
+        <h1>Attendance Tracker</h1>
+        <div class="burger-menu" onclick="toggleMenu()">☰</div>
+        <nav id="navMenu" class="nav-hidden">
+            <ul>
+                <li onclick="selectSheet('Sheet1')">Sheet 1</li>
+                <li onclick="selectSheet('Sheet2')">Sheet 2</li>
+                <!-- Tambahkan sheet lain jika perlu -->
+            </ul>
+        </nav>
     </header>
 
-    <section>
-        <h2>Upload Excel File</h2>
-        <input type="file" id="upload" accept=".xlsx, .xls" />
-        <button onclick="exportToExcel()">Download Updated File</button>
+    <main>
+        <section class="upload-section">
+            <h2>Upload Excel File</h2>
+            <input type="file" id="upload" accept=".xlsx, .xls" />
+            <button onclick="exportToExcel()">Download Updated File</button>
+        </section>
 
-        <h2>Attendance Table</h2>
-        <table id="attendanceTable">
-            <thead>
-                <tr>
-                    <!-- Header will be dynamically generated -->
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Data rows will be dynamically inserted here -->
-            </tbody>
-        </table>
-    </section>
+        <section class="data-input-section">
+            <h2>Input Random Data</h2>
+            <textarea id="randomData" rows="10" placeholder="Paste your random data here..."></textarea>
+            <button onclick="updateAttendance()">Update Attendance</button>
+        </section>
 
-    <script src="absen5.js"></script>
+        <section class="table-section">
+            <h2>Attendance Table</h2>
+            <table id="attendanceTable">
+                <thead>
+                    <tr>
+                        <!-- Header will be dynamically generated -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data rows will be dynamically inserted here -->
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
 </body>
 </html>
