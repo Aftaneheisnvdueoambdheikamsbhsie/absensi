@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Tracker with Excel</title>
+    <link rel="stylesheet" href="absen5.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Attendance Tracker with Excel</h1>
+    </header>
+
+    <section>
+        <h2>Upload Excel File</h2>
+        <input type="file" id="upload" accept=".xlsx, .xls" />
+        <button onclick="exportToExcel()">Download Updated File</button>
+
+        <h2>Attendance Table</h2>
+        <table id="attendanceTable">
+            <thead>
+                <tr>
+                    <!-- Header will be dynamically generated -->
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data rows will be dynamically inserted here -->
+            </tbody>
+        </table>
+    </section>
+
+    <script src="absen5.js"></script>
+</body>
+</html>
