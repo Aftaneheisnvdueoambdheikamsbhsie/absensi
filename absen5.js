@@ -1,132 +1,143 @@
+// Variabel untuk menyimpan data dan sheet yang dipilih
 let attendanceData = [];
-let currentSheetName = ''; // Default sheet
-let currentWorkbook; // Menyimpan workbook saat ini
-
-// Fungsi untuk toggle menu
-function toggleMenu() {
-    const menu = document.getElementById('navMenu');
-    menu.classList.toggle('nav-hidden');
-}
-
-// Fungsi untuk memilih sheet
-function selectSheet(sheetName) {
-    currentSheetName = sheetName;
-    loadSheet(currentWorkbook, currentSheetName); // Muat sheet yang dipilih
-}
+let currentSheetName = ''; // Nama sheet yang dipilih
 
 // Fungsi untuk membaca file Excel
 document.getElementById('upload').addEventListener('change', handleFile, false);
 
 function handleFile(e) {
-    const files = e.target.files;
-    const file = files[0];
+    var files = e.target.files;
+    var file = files[0];
 
-    const reader = new FileReader();
+    var reader = new FileReader();
     reader.onload = function (event) {
-        const data = new Uint8Array(event.target.result);
-        currentWorkbook = XLSX.read(data, { type: 'array' });
+        var data = new Uint8Array(event.target.result);
+        var workbook = XLSX.read(data, { type: 'array' });
 
-        // Ambil semua nama sheet secara dinamis
-        const sheetNames = currentWorkbook.SheetNames;
-        populateSheetMenu(sheetNames); // Memperbarui menu dengan nama sheet
+        // Tampilkan nama-nama sheet yang ada
+        loadSheetNames(workbook);
 
-        // Muat sheet default atau sheet pertama
-        if (sheetNames.length > 0) {
-            currentSheetName = sheetNames[0]; // Set sheet default ke sheet pertama
-            loadSheet(currentWorkbook, currentSheetName);
-        }
+        // Muat sheet pertama secara default
+        currentSheetName = workbook.SheetNames[0];
+        loadSheet(workbook, currentSheetName);
     };
     reader.readAsArrayBuffer(file);
 }
 
-// Memperbarui menu dengan nama sheet yang ada
-function populateSheetMenu(sheetNames) {
-    const navMenu = document.getElementById('navMenu');
-    navMenu.innerHTML = ''; // Kosongkan menu
+// Fungsi untuk menampilkan daftar sheet di dalam menu
+function loadSheetNames(workbook) {
+    var sheetNames = workbook.SheetNames;
+    var navMenu = document.getElementById('navMenu');
+    var ul = navMenu.querySelector('ul');
+    ul.innerHTML = ''; // Kosongkan daftar menu
 
-    sheetNames.forEach(sheetName => {
-        const li = document.createElement('li');
-        li.textContent = sheetName;
-        li.onclick = () => selectSheet(sheetName); // Mengatur fungsi onclick
-        navMenu.appendChild(li);
+    // Buat daftar sheet di menu
+    sheetNames.forEach(function (sheetName) {
+        var li = document.createElement('li');
+        li.innerText = sheetName;
+        li.onclick = function () {
+            selectSheet(sheetName, workbook); // Muat sheet saat diklik
+        };
+        ul.appendChild(li); // Tambahkan ke daftar menu
     });
-
-    toggleMenu(); // Tampilkan menu setelah diupdate
 }
 
-// Fungsi untuk memuat sheet berdasarkan kelas
+// Fungsi untuk memuat data dari sheet yang dipilih
+function selectSheet(sheetName, workbook) {
+    currentSheetName = sheetName;
+    loadSheet(workbook, sheetName);
+}
+
+// Fungsi untuk memuat dan merender data sheet ke tabel HTML
 function loadSheet(workbook, sheetName) {
-    const sheet = workbook.Sheets[sheetName];
+    var sheet = workbook.Sheets[sheetName];
     if (!sheet) {
-        alert('Sheet tidak ditemukan!');
+        alert('Sheet not found!');
         return;
     }
 
-    // Mengambil data dalam format JSON
-    const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-    updateAttendanceData(jsonData); // Mengupdate data kehadiran
-    renderTable(); // Merender tabel
+    // Convert sheet ke JSON
+    var jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+    // Update attendance data dengan data dari sheet
+    updateAttendanceData(jsonData);
+
+    // Render data ke dalam tabel HTML
+    renderTable();
 }
 
-// Mengupdate data kehadiran berdasarkan input acak
+// Fungsi untuk mengupdate attendance data
+function updateAttendanceData(data) {
+    attendanceData = data; // Simpan data dari sheet ke variabel
+}
+
+// Fungsi untuk menampilkan data di tabel HTML
+function renderTable() {
+    var table = document.getElementById('attendanceTable');
+    var thead = table.querySelector('thead tr');
+    var tbody = table.querySelector('tbody');
+
+    // Hapus semua baris di tabel sebelum render ulang
+    thead.innerHTML = '';
+    tbody.innerHTML = '';
+
+    // Tambahkan header dari baris pertama Excel
+    attendanceData[0].forEach(function (col) {
+        var th = document.createElement('th');
+        th.innerText = col;
+        thead.appendChild(th);
+    });
+
+    // Tambahkan baris data
+    for (var i = 1; i < attendanceData.length; i++) {
+        var row = document.createElement('tr');
+        attendanceData[i].forEach(function (cell) {
+            var td = document.createElement('td');
+            td.innerText = cell;
+            row.appendChild(td);
+        });
+        tbody.appendChild(row);
+    }
+}
+
+// Fungsi untuk mengupdate data absensi secara acak
 function updateAttendance() {
     const rawData = document.getElementById('randomData').value.trim();
-    const dateInput = document.getElementById('inputDate').value;
-    
-    if (!dateInput) {
-        alert('Silakan pilih tanggal!');
-        return;
-    }
-
-    const dateParts = dateInput.split('-'); // Memecah tanggal menjadi [YYYY, MM, DD]
-    const newEntries = [];
     const lines = rawData.split('\n');
+    const newEntries = [];
 
+    // Proses data acak yang diinput
     lines.forEach(line => {
         const parts = line.split(' ');
-        const name = parts.slice(1, parts.length - 1).join(' ');
-        const className = parts[parts.length - 1];
-
-        // Pastikan ada nama dan kelas
+        const name = parts[0];
+        const className = parts[1]; // Anggap kelas adalah kata kedua
         if (name && className) {
-            // Menambahkan status kehadiran dengan karakter 'P'
-            newEntries.push([parts[0], name, className, 'P', dateParts[1], dateParts[2]]); // Menambahkan bulan dan tanggal
+            newEntries.push([name, className]);
         }
     });
 
-    // Tambahkan data baru ke attendanceData
+    // Tambahkan atau update data absensi yang baru
     newEntries.forEach(row => {
-        const existingIndex = attendanceData.findIndex(entry => entry[1] === row[1] && entry[2] === row[2]);
+        const existingIndex = attendanceData.findIndex(entry => entry[0] === row[0]);
         if (existingIndex !== -1) {
-            attendanceData[existingIndex] = row; // Update data yang sudah ada
+            attendanceData[existingIndex] = row; // Update entry yang sudah ada
         } else {
-            attendanceData.push(row); // Tambahkan data baru
+            attendanceData.push(row); // Tambah entry baru
         }
     });
 
-    renderTable(); // Render ulang tabel
-}
-
-// Fungsi untuk merender tabel
-function renderTable() {
-    const table = document.getElementById('attendanceTable').getElementsByTagName('tbody')[0];
-    table.innerHTML = ''; // Kosongkan tabel sebelum merender ulang
-
-    attendanceData
-        .filter(row => row[2].startsWith(currentSheetName.slice(5))) // Hanya tampilkan data untuk kelas yang dipilih
-        .forEach((row, index) => {
-            const newRow = table.insertRow();
-            newRow.insertCell().textContent = index + 1; // Nomor
-            row.forEach((cell, cellIndex) => {
-                const newCell = newRow.insertCell();
-                newCell.textContent = cell; // Isi sel dengan data
-            });
-        });
+    renderTable(); // Render tabel yang sudah diupdate
 }
 
 // Fungsi untuk men-download file Excel yang sudah di-update
 function exportToExcel() {
-    const table = document.getElementById('attendanceTable');
-    const wb = XLSX.utils.table_to_book(table, { sheet: currentSheetName });
+    var table = document.getElementById('attendanceTable');
+    var wb = XLSX.utils.table_to_book(table, { sheet: "Attendance" });
     XLSX.writeFile(wb, 'updated_attendance.xlsx');
+}
+
+// Fungsi untuk toggle menu
+function toggleMenu() {
+    const menu = document.getElementById('navMenu');
+    menu.classList.toggle('nav-hidden');
 }
