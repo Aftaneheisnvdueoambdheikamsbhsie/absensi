@@ -58,9 +58,10 @@ main {
     padding: 2rem;
 }
 
-/* Section untuk upload file */
+/* Section untuk upload file, input data, dan tabel */
 .upload-section, 
 .data-input-section, 
+.date-input-section, 
 .table-section {
     margin-bottom: 2rem;
 }
