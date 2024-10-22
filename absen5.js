@@ -1,6 +1,11 @@
-
-let attendanceData = [];
+let attendanceData = {
+    Kelas3: [],
+    Kelas4: [],
+    Kelas5: [],
+    Kelas6: [],
+}; // Memisahkan data berdasarkan kelas
 let currentSheetName = 'Kelas3'; // Default sheet
+let sheetNames = []; // Array untuk menyimpan nama sheet
 
 // Fungsi untuk toggle menu
 function toggleMenu() {
@@ -18,26 +23,25 @@ function selectSheet(sheetName) {
 document.getElementById('upload').addEventListener('change', handleFile, false);
 
 function handleFile(e) {
-    var files = e.target.files;
-    var file = files[0];
+    const files = e.target.files;
+    const file = files[0];
 
-    var reader = new FileReader();
+    const reader = new FileReader();
     reader.onload = function (event) {
-        var data = new Uint8Array(event.target.result);
-        var workbook = XLSX.read(data, { type: 'array' });
+        const data = new Uint8Array(event.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
 
         // Ambil semua nama sheet secara dinamis
-        var sheetNames = workbook.SheetNames;
-        if (!sheetNames.includes(currentSheetName)) {
-            currentSheetName = sheetNames[0]; // Jika sheet tidak ditemukan, default ke sheet pertama
-        }
+        sheetNames = workbook.SheetNames;
+        populateSheetMenu(sheetNames); // Memperbarui menu dengan nama sheet
 
-        loadSheet(workbook, currentSheetName);
+        // Muat sheet default atau sheet pertama
+        loadSheet(workbook, sheetNames[0]); 
     };
     reader.readAsArrayBuffer(file);
 }
 
-// Fungsi untuk memuat sheet berdasarkan kelas
+// Fungsi untuk memuat sheet berdasarkan nama
 function loadSheet(workbook, sheetName) {
     const sheet = workbook.Sheets[sheetName];
     if (!sheet) {
@@ -50,11 +54,27 @@ function loadSheet(workbook, sheetName) {
     renderTable();
 }
 
+// Memperbarui menu dengan nama sheet yang ada
+function populateSheetMenu(sheetNames) {
+    const navMenu = document.getElementById('navMenu');
+    navMenu.innerHTML = ''; // Kosongkan menu
+
+    sheetNames.forEach(sheetName => {
+        const li = document.createElement('li');
+        li.textContent = sheetName;
+        li.onclick = () => selectSheet(sheetName); // Mengatur fungsi onclick
+        navMenu.appendChild(li);
+    });
+
+    // Tampilkan menu setelah diupdate
+    toggleMenu();
+}
+
 // Fungsi untuk mengupdate data kehadiran berdasarkan input acak
 function updateAttendance() {
     const rawData = document.getElementById('randomData').value.trim();
     const dateInput = document.getElementById('inputDate').value;
-    
+
     if (!dateInput) {
         alert('Silakan pilih tanggal!');
         return;
@@ -74,13 +94,17 @@ function updateAttendance() {
         }
     });
 
-    // Tambahkan data baru ke attendanceData
+    // Tambahkan data baru ke attendanceData sesuai kelasnya
     newEntries.forEach(row => {
-        const existingIndex = attendanceData.findIndex(entry => entry[1] === row[1] && entry[2] === row[2]);
-        if (existingIndex !== -1) {
-            attendanceData[existingIndex] = row; // Update data yang sudah ada
-        } else {
-            attendanceData.push(row); // Tambahkan data baru
+        const classKey = row[2]; // Mendapatkan kelas dari data yang baru
+
+        if (attendanceData[classKey]) {
+            const existingIndex = attendanceData[classKey].findIndex(entry => entry[1] === row[1]);
+            if (existingIndex !== -1) {
+                attendanceData[classKey][existingIndex] = row; // Update data yang sudah ada
+            } else {
+                attendanceData[classKey].push(row); // Tambahkan data baru
+            }
         }
     });
 
@@ -92,17 +116,18 @@ function renderTable() {
     const table = document.getElementById('attendanceTable').getElementsByTagName('tbody')[0];
     table.innerHTML = ''; // Kosongkan tabel sebelum merender ulang
 
-    attendanceData
-        .filter(row => row[2].startsWith(currentSheetName.slice(5))) // Hanya tampilkan data untuk kelas yang dipilih
-        .forEach((row, index) => {
-            const newRow = table.insertRow();
-            newRow.insertCell().textContent = index + 1; // Nomor
-            row.forEach(cell => {
-                const newCell = newRow.insertCell();
-                newCell.textContent = cell;
-            });
-       
+    // Mendapatkan data dari kelas yang dipilih
+    const dataToRender = attendanceData[currentSheetName] || [];
 
+    dataToRender.forEach((row, index) => {
+        const newRow = table.insertRow();
+        newRow.insertCell().textContent = index + 1; // Nomor
+        row.forEach(cell => {
+            const newCell = newRow.insertCell();
+            newCell.textContent = cell;
+        });
+    });
+}
 
 // Fungsi untuk men-download file Excel yang sudah di-update
 function exportToExcel() {
