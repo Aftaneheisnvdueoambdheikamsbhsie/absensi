@@ -1,5 +1,6 @@
 let attendanceData = [];
-let currentSheetName = ' '; // Default sheet
+let currentSheetName = ''; // Default sheet
+let currentWorkbook; // Menyimpan workbook saat ini
 
 // Fungsi untuk toggle menu
 function toggleMenu() {
@@ -14,8 +15,6 @@ function selectSheet(sheetName) {
 }
 
 // Fungsi untuk membaca file Excel
-let currentWorkbook; // Menyimpan workbook saat ini
-
 document.getElementById('upload').addEventListener('change', handleFile, false);
 
 function handleFile(e) {
@@ -63,12 +62,13 @@ function loadSheet(workbook, sheetName) {
         return;
     }
 
+    // Mengambil data dalam format JSON
     const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-    updateAttendanceData(jsonData);
-    renderTable();
+    updateAttendanceData(jsonData); // Mengupdate data kehadiran
+    renderTable(); // Merender tabel
 }
 
-// Fungsi untuk mengupdate data kehadiran berdasarkan input acak
+// Mengupdate data kehadiran berdasarkan input acak
 function updateAttendance() {
     const rawData = document.getElementById('randomData').value.trim();
     const dateInput = document.getElementById('inputDate').value;
@@ -87,7 +87,9 @@ function updateAttendance() {
         const name = parts.slice(1, parts.length - 1).join(' ');
         const className = parts[parts.length - 1];
 
+        // Pastikan ada nama dan kelas
         if (name && className) {
+            // Menambahkan status kehadiran dengan karakter 'P'
             newEntries.push([parts[0], name, className, 'P', dateParts[1], dateParts[2]]); // Menambahkan bulan dan tanggal
         }
     });
@@ -115,9 +117,9 @@ function renderTable() {
         .forEach((row, index) => {
             const newRow = table.insertRow();
             newRow.insertCell().textContent = index + 1; // Nomor
-            row.forEach(cell => {
+            row.forEach((cell, cellIndex) => {
                 const newCell = newRow.insertCell();
-                newCell.textContent = cell;
+                newCell.textContent = cell; // Isi sel dengan data
             });
         });
 }
