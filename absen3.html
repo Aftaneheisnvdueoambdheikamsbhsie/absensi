@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Attendance Tracker</title>
+    <link rel="stylesheet" href="absen3.css">
+</head>
+<body>
+    <header>
+        <div class="burger-menu">
+            <button id="burger-btn">&#9776;</button>
+            <nav id="menu">
+                <ul>
+                    <li><a href="#" onclick="showClass('class3')">Class 3</a></li>
+                    <li><a href="#" onclick="showClass('class4')">Class 4</a></li>
+                    <li><a href="#" onclick="showClass('class5')">Class 5</a></li>
+                    <li><a href="#" onclick="showClass('class6')">Class 6</a></li>
+                </ul>
+            </nav>
+        </div>
+        <div class="date-input">
+            <label for="month">Month:</label>
+            <input type="text" id="month" placeholder="e.g., July 2024">
+            <label for="date">Date:</label>
+            <input type="text" id="date" placeholder="e.g., 16/07/2024">
+        </div>
+    </header>
+
+    <main>
+        <div class="input-section">
+            <textarea id="studentInput" placeholder="Paste student attendance data here..."></textarea>
+            <button onclick="processData()">Process Data</button>
+        </div>
+
+        <div id="outputTable">
+            <!-- Dynamic table will go here -->
+        </div>
+
+        <button id="exportBtn" onclick="exportToExcel()">Export to Excel</button>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Attendance Tracker</p>
+    </footer>
+
+    <script src="absen3.js"></script>
+    <script src="xlsx.full.min.js"></script>
+</body>
+</html>
