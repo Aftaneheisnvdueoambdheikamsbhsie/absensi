@@ -1,5 +1,5 @@
 let attendanceData = [];
-let currentSheetName = 'Kelas3'; // Default sheet
+let currentSheetName = ' '; // Default sheet
 
 // Fungsi untuk toggle menu
 function toggleMenu() {
