@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Attendance Manager</title>
+  <link rel="stylesheet" href="absen.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Student Attendance Manager</h1>
+    </header>
+
+    <main>
+      <form id="inputForm">
+        <label for="dataInput">Enter Student Data (Name and Class):</label>
+        <textarea id="dataInput" rows="10" placeholder="e.g., Monisa 6c"></textarea>
+        <label for="attendanceDate">Attendance Date:</label>
+        <input type="date" id="attendanceDate">
+        <button type="submit">Process Data</button>
+      </form>
+
+      <div id="outputMessage"></div>
+    </main>
+
+    <footer>
+      <p>&copy; 2024 Student Attendance Manager</p>
+    </footer>
+  </div>
+
+  <script src="xlsx.full.min.js"></script>
+  <script src="absen2.js"></script>
+</body>
+</html>
