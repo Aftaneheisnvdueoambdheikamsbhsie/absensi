@@ -1,3 +1,18 @@
+let attendanceData = [];
+let currentSheetName = 'Kelas3'; // Default sheet
+
+// Fungsi untuk toggle menu
+function toggleMenu() {
+    const menu = document.getElementById('navMenu');
+    menu.classList.toggle('nav-hidden');
+}
+
+// Fungsi untuk memilih sheet
+function selectSheet(sheetName) {
+    currentSheetName = sheetName;
+    renderTable(); // Render ulang tabel untuk sheet yang dipilih
+}
+
 // Fungsi untuk membaca file Excel
 document.getElementById('upload').addEventListener('change', handleFile, false);
 
@@ -10,88 +25,17 @@ function handleFile(e) {
         var data = new Uint8Array(event.target.result);
         var workbook = XLSX.read(data, { type: 'array' });
 
-        // Ambil sheet pertama
-        var firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-
-        // Convert sheet ke JSON
-        var sheetData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-
-        // Render ke dalam tabel HTML
-        renderTable(sheetData);
-    };
-    reader.readAsArrayBuffer(file);
-}
-
-// Fungsi untuk menampilkan data di tabel HTML
-function renderTable(data) {
-    var table = document.getElementById('attendanceTable');
-    var thead = table.querySelector('thead tr');
-    var tbody = table.querySelector('tbody');
-
-    // Hapus semua baris di tabel sebelum render ulang
-    thead.innerHTML = '';
-    tbody.innerHTML = '';
-
-    // Tambahkan header dari baris pertama Excel
-    data[0].forEach(function (col) {
-        var th = document.createElement('th');
-        th.innerText = col;
-        thead.appendChild(th);
-    });
-
-    // Tambahkan baris data
-    for (var i = 1; i < data.length; i++) {
-        var row = document.createElement('tr');
-        data[i].forEach(function (cell) {
-            var td = document.createElement('td');
-            td.innerText = cell;
-            row.appendChild(td);
-        });
-        tbody.appendChild(row);
-    }
-}
-
-// Fungsi untuk men-download file Excel yang sudah di-update
-function exportToExcel() {
-    var table = document.getElementById('attendanceTable');
-    var wb = XLSX.utils.table_to_book(table, { sheet: "Attendance" });
-    XLSX.writeFile(wb, 'updated_attendance.xlsx');
-}
-let attendanceData = [];
-let currentSheetName = 'Sheet1'; // Default sheet
-
-// Toggle menu
-function toggleMenu() {
-    const menu = document.getElementById('navMenu');
-    menu.classList.toggle('nav-hidden');
-}
-
-// Select sheet
-function selectSheet(sheetName) {
-    currentSheetName = sheetName;
-    // Logic to load the selected sheet data (optional)
-    alert(`Switched to ${sheetName}`);
-}
-
-// Read Excel file
-document.getElementById('upload').addEventListener('change', (event) => {
-    const file = event.target.files[0];
-    const reader = new FileReader();
-
-    reader.onload = (e) => {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
+        // Ambil sheet berdasarkan pilihan
         loadSheet(workbook, currentSheetName);
     };
-
     reader.readAsArrayBuffer(file);
-});
+}
 
-// Load selected sheet data
+// Fungsi untuk memuat sheet berdasarkan kelas
 function loadSheet(workbook, sheetName) {
     const sheet = workbook.Sheets[sheetName];
     if (!sheet) {
-        alert('Sheet not found!');
+        alert('Sheet tidak ditemukan!');
         return;
     }
 
@@ -100,33 +44,54 @@ function loadSheet(workbook, sheetName) {
     renderTable();
 }
 
-// Update attendance data with random data
+// Fungsi untuk mengupdate data kehadiran berdasarkan input acak
 function updateAttendance() {
     const rawData = document.getElementById('randomData').value.trim();
     const lines = rawData.split('\n');
     const newEntries = [];
 
-    // Process the random data
     lines.forEach(line => {
         const parts = line.split(' ');
-        const name = parts[0];
-        const className = parts[1]; // Assuming class is the second word
+        const name = parts.slice(1, parts.length - 1).join(' '); // Menggabungkan nama
+        const className = parts[parts.length - 1]; // Bagian terakhir adalah kelas
+
         if (name && className) {
-            newEntries.push([name, className]);
+            newEntries.push([parts[0], name, className, 'P']); // Tanda ceklis Windings 2
         }
     });
 
-    // Add new entries to attendance data
+    // Tambahkan data baru ke attendanceData
     newEntries.forEach(row => {
-        const existingIndex = attendanceData.findIndex(entry => entry[0] === row[0]);
+        const existingIndex = attendanceData.findIndex(entry => entry[1] === row[1]);
         if (existingIndex !== -1) {
-            attendanceData[existingIndex] = row; // Update existing entry
+            attendanceData[existingIndex] = row; // Update data yang sudah ada
         } else {
-            attendanceData.push(row); // Add new entry
+            attendanceData.push(row); // Tambahkan data baru
         }
     });
 
-    renderTable(); // Render updated table
+    renderTable(); // Render ulang tabel
 }
 
-// Other existing functions (updateAttendanceData, renderTable, exportToExcel)...
+// Fungsi untuk merender tabel
+function renderTable() {
+    const table = document.getElementById('attendanceTable').getElementsByTagName('tbody')[0];
+    table.innerHTML = ''; // Kosongkan tabel sebelum merender ulang
+
+    attendanceData
+        .filter(row => row[2].startsWith(currentSheetName.slice(5))) // Hanya tampilkan data untuk kelas yang dipilih
+        .forEach(row => {
+            const newRow = table.insertRow();
+            row.forEach(cell => {
+                const newCell = newRow.insertCell();
+                newCell.textContent = cell;
+            });
+        });
+}
+
+// Fungsi untuk men-download file Excel yang sudah di-update
+function exportToExcel() {
+    const table = document.getElementById('attendanceTable');
+    const wb = XLSX.utils.table_to_book(table, { sheet: currentSheetName });
+    XLSX.writeFile(wb, 'updated_attendance.xlsx');
+}
