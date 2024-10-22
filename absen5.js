@@ -33,25 +33,15 @@ function handleFile(e) {
 
         // Ambil semua nama sheet secara dinamis
         sheetNames = workbook.SheetNames;
+
+        console.log(sheetNames); // Debugging: tampilkan nama sheet di konsol
+
         populateSheetMenu(sheetNames); // Memperbarui menu dengan nama sheet
 
         // Muat sheet default atau sheet pertama
-        loadSheet(workbook, sheetNames[0]); 
+        loadSheet(workbook, sheetNames[0]);
     };
     reader.readAsArrayBuffer(file);
-}
-
-// Fungsi untuk memuat sheet berdasarkan nama
-function loadSheet(workbook, sheetName) {
-    const sheet = workbook.Sheets[sheetName];
-    if (!sheet) {
-        alert('Sheet tidak ditemukan!');
-        return;
-    }
-
-    const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-    updateAttendanceData(jsonData);
-    renderTable();
 }
 
 // Memperbarui menu dengan nama sheet yang ada
@@ -59,16 +49,24 @@ function populateSheetMenu(sheetNames) {
     const navMenu = document.getElementById('navMenu');
     navMenu.innerHTML = ''; // Kosongkan menu
 
-    sheetNames.forEach(sheetName => {
+    // Jika tidak ada sheet yang ditemukan
+    if (sheetNames.length === 0) {
         const li = document.createElement('li');
-        li.textContent = sheetName;
-        li.onclick = () => selectSheet(sheetName); // Mengatur fungsi onclick
+        li.textContent = 'Tidak ada sheet ditemukan';
         navMenu.appendChild(li);
-    });
+    } else {
+        sheetNames.forEach(sheetName => {
+            const li = document.createElement('li');
+            li.textContent = sheetName;
+            li.onclick = () => selectSheet(sheetName); // Mengatur fungsi onclick
+            navMenu.appendChild(li);
+        });
+    }
 
     // Tampilkan menu setelah diupdate
     toggleMenu();
 }
+
 
 // Fungsi untuk mengupdate data kehadiran berdasarkan input acak
 function updateAttendance() {
