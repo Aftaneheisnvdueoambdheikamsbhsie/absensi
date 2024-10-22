@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Checker</title>
+    <link rel="stylesheet" href="absen4.css">
+</head>
+<body>
+    <header>
+        <h1>Attendance Checker</h1>
+        <nav>
+            <div class="burger-menu">
+                <button id="burgerButton" onclick="toggleMenu()">☰ Menu</button>
+                <div id="menuItems" class="menu-items">
+                    <a href="#class3">Class 3</a>
+                    <a href="#class4">Class 4</a>
+                    <a href="#class5">Class 5</a>
+                    <a href="#class6">Class 6</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <label for="dataInput">Paste Data (Name and Class):</label>
+        <textarea id="dataInput" rows="1000" placeholder="Example: &#10;1. Monisa 6c&#10;2. Zetha 4b&#10;..."></textarea>
+
+        <label for="updateDate">Date:</label>
+        <input type="date" id="updateDate">
+
+        <button onclick="processData()">Process Data</button>
+
+        <div id="outputTable"></div>
+    </div>
+
+    <script src="xlxx.full.min.js"></script>
+    <script src="absen4.js"></script>
+</body>
+</html>
