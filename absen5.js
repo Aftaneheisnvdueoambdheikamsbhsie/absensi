@@ -1,6 +1,7 @@
 // Variabel untuk menyimpan data dan sheet yang dipilih
 let attendanceData = [];
 let currentSheetName = ''; // Nama sheet yang dipilih
+let randomData = []; // Data acak yang akan digunakan untuk kehadiran
 
 // Fungsi untuk membaca file Excel
 document.getElementById('upload').addEventListener('change', handleFile, false);
@@ -88,6 +89,11 @@ function renderTable() {
         thead.appendChild(th);
     });
 
+    // Tambahkan kolom baru untuk kehadiran
+    var th = document.createElement('th');
+    th.innerText = "Kehadiran";
+    thead.appendChild(th);
+
     // Tambahkan baris data
     for (var i = 1; i < attendanceData.length; i++) {
         var row = document.createElement('tr');
@@ -96,15 +102,29 @@ function renderTable() {
             td.innerText = cell;
             row.appendChild(td);
         });
+
+        // Tambahkan status kehadiran
+        var statusTd = document.createElement('td');
+        const name = attendanceData[i][0];
+        const className = attendanceData[i][1];
+        const isPresent = checkAttendance(name, className);
+        statusTd.innerText = isPresent ? 'P' : ''; // Gunakan karakter 'P' atau simbol Wingdings
+        row.appendChild(statusTd);
+
         tbody.appendChild(row);
     }
+}
+
+// Fungsi untuk memeriksa kehadiran berdasarkan data acak
+function checkAttendance(name, className) {
+    return randomData.some(entry => entry[0] === name && entry[1] === className);
 }
 
 // Fungsi untuk mengupdate data absensi secara acak
 function updateAttendance() {
     const rawData = document.getElementById('randomData').value.trim();
     const lines = rawData.split('\n');
-    const newEntries = [];
+    randomData = [];
 
     // Proses data acak yang diinput
     lines.forEach(line => {
@@ -112,17 +132,7 @@ function updateAttendance() {
         const name = parts[0];
         const className = parts[1]; // Anggap kelas adalah kata kedua
         if (name && className) {
-            newEntries.push([name, className]);
-        }
-    });
-
-    // Tambahkan atau update data absensi yang baru
-    newEntries.forEach(row => {
-        const existingIndex = attendanceData.findIndex(entry => entry[0] === row[0]);
-        if (existingIndex !== -1) {
-            attendanceData[existingIndex] = row; // Update entry yang sudah ada
-        } else {
-            attendanceData.push(row); // Tambah entry baru
+            randomData.push([name, className]);
         }
     });
 
