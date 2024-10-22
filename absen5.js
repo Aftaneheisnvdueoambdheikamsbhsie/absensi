@@ -105,8 +105,10 @@ function fuzzyMatch(str1, str2) {
     return str1.toLowerCase().includes(str2.toLowerCase()) || str2.toLowerCase().includes(str1.toLowerCase());
 }
 
+
 // Fungsi untuk mengupdate data absensi secara acak dengan pencocokan nama dan kelas
 function updateAttendance() {
+    console.log('Update Attendance button clicked');
     const rawData = document.getElementById('randomData').value.trim();
     const lines = rawData.split('\n');
     const newEntries = [];
