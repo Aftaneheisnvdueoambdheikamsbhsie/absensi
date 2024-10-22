@@ -1,35 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Attendance Manager</title>
-  <link rel="stylesheet" href="absen.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Tracker</title>
+    <link rel="stylesheet" href="absen2.css">
 </head>
 <body>
-  <div class="container">
     <header>
-      <h1>Student Attendance Manager</h1>
+        <div class="logo">Attendance Tracker</div>
+        <div class="burger-menu" id="burgerMenu">☰</div>
     </header>
 
+    <nav class="side-menu" id="sideMenu">
+        <ul>
+            <li><a href="#class3">Class 3</a></li>
+            <li><a href="#class4">Class 4</a></li>
+            <li><a href="#class5">Class 5</a></li>
+            <li><a href="#class6">Class 6</a></li>
+        </ul>
+    </nav>
+
     <main>
-      <form id="inputForm">
-        <label for="dataInput">Enter Student Data (Name and Class):</label>
-        <textarea id="dataInput" rows="10" placeholder="e.g., Monisa 6c"></textarea>
-        <label for="attendanceDate">Attendance Date:</label>
-        <input type="date" id="attendanceDate">
-        <button type="submit">Process Data</button>
-      </form>
-
-      <div id="outputMessage"></div>
+        <section id="class3">
+            <h2>Class 3 Attendance</h2>
+            <table id="tableClass3">
+                <!-- Data will be dynamically added here -->
+            </table>
+        </section>
+      <section id="class4">
+             <h2>Class 3 Attendance</h2>
+            <table id="tableClass4">
+                <!-- Data will be dynamically added here -->
+            </table>
+      </section>
+            <section id="class5">
+             <h2>Class 3 Attendance</h2>
+            <table id="tableClass5">
+                <!-- Data will be dynamically added here -->
+            </table>
+      </section>
+            <section id="class6">
+             <h2>Class 3 Attendance</h2>
+            <table id="tableClass6">
+                <!-- Data will be dynamically added here -->
+            </table>
+      </section>
     </main>
+<form id="formAbsensi">
+    <label for="inputNama">Nama dan Kelas (misal: Monisa 6C):</label>
+    <textarea id="inputNama" rows="10" cols="50"></textarea>
+    <button type="button" id="btnProses">Proses Absensi</button>
+    <button type="button" id="btnExport">Export to Excel</button>
+</form>
 
-    <footer>
-      <p>&copy; 2024 Student Attendance Manager</p>
-    </footer>
-  </div>
-
-  <script src="xlsx.full.min.js"></script>
-  <script src="absen2.js"></script>
+    <script src="xlsx.full.min.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
