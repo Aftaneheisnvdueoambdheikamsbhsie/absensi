@@ -1,44 +1,74 @@
-document.getElementById('inputForm').addEventListener('submit', function(event) {
-  event.preventDefault();
+// Menangani tampilan menu burger
+document.getElementById('burgerMenu').addEventListener('click', function() {
+    const sideMenu = document.getElementById('sideMenu');
+    sideMenu.style.display = sideMenu.style.display === 'block' ? 'none' : 'block';
+});
 
-  const dataInput = document.getElementById('dataInput').value.trim();
-  const attendanceDate = document.getElementById('attendanceDate').value;
-  
-  if (!dataInput || !attendanceDate) {
-    alert('Please enter student data and attendance date.');
-    return;
-  }
+// Fungsi untuk memproses data absensi
+function prosesAbsensi() {
+    const inputText = document.getElementById('inputNama').value;
+    const lines = inputText.split('\n');
+    
+    // Array untuk menyimpan data per kelas
+    const dataKelas = {
+        '3': [],
+        '4': [],
+        '5': [],
+        '6': []
+    };
 
-  const students = dataInput.split('\n').map(row => {
-    const parts = row.trim().split(' ');
-    const className = parts.pop();
-    const name = parts.join(' ');
-    return { name, className };
-  });
-
-  students.sort((a, b) => a.className.localeCompare(b.className));
-
-  const workbook = XLSX.utils.book_new();
-
-  const groupedByClass = students.reduce((acc, curr) => {
-    if (!acc[curr.className]) acc[curr.className] = [];
-    acc[curr.className].push(curr.name);
-    return acc;
-  }, {});
-
-  for (let className in groupedByClass) {
-    let sheetData = [];
-    const classStudents = groupedByClass[className];
-
-    sheetData.push(['No', 'Name', 'Class', 'Attendance']);
-    classStudents.forEach((student, index) => {
-      sheetData.push([index + 1, student, className, 'p']); // 'p' for Wingdings checkmark
+    // Memproses setiap baris input
+    lines.forEach(function(line) {
+        const [nama, kelas] = line.trim().split(' ');
+        if (dataKelas[kelas[0]]) {
+            dataKelas[kelas[0]].push({ nama, kelas });
+        }
     });
 
-    let sheet = XLSX.utils.aoa_to_sheet(sheetData);
-    XLSX.utils.book_append_sheet(workbook, sheet, className);
-  }
+    // Menampilkan data di tabel HTML
+    tampilkanData(dataKelas);
+}
 
-  XLSX.writeFile(workbook, `Attendance_${attendanceDate}.xlsx`);
-  document.getElementById('outputMessage').innerText = 'File successfully generated!';
-});
+// Fungsi untuk menampilkan data di tabel HTML
+function tampilkanData(dataKelas) {
+    Object.keys(dataKelas).forEach(function(kelas) {
+        const table = document.getElementById(`tableClass${kelas}`);
+        table.innerHTML = ''; // Menghapus isi tabel sebelumnya
+
+        // Header tabel
+        let headerRow = '<tr><th>Tanggal</th><th>Nama</th><th>Status</th></tr>';
+        table.innerHTML += headerRow;
+
+        // Menambahkan data ke tabel
+        dataKelas[kelas].forEach(function(item) {
+            const status = '<span style="font-family: Wingdings 2;">p</span>'; // Ceklis
+            const row = `<tr><td>${getCurrentDate()}</td><td>${item.nama}</td><td>${status}</td></tr>`;
+            table.innerHTML += row;
+        });
+    });
+}
+
+// Fungsi untuk mendapatkan tanggal saat ini
+function getCurrentDate() {
+    const date = new Date();
+    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`; // Format DD/MM/YYYY
+}
+
+// Fungsi untuk mengekspor data ke Excel
+function exportToExcel() {
+    const workbook = XLSX.utils.book_new();
+
+    // Mengambil data dari setiap tabel dan menambahkannya ke workbook
+    for (let kelas = 3; kelas <= 6; kelas++) {
+        const table = document.getElementById(`tableClass${kelas}`);
+        const worksheet = XLSX.utils.table_to_sheet(table);
+        XLSX.utils.book_append_sheet(workbook, worksheet, `Class ${kelas}`);
+    }
+
+    // Menyimpan file Excel
+    XLSX.writeFile(workbook, "attendance.xlsx");
+}
+
+// Menambahkan event listener untuk tombol proses dan ekspor
+document.getElementById('btnProses').addEventListener('click', prosesAbsensi);
+document.getElementById('btnExport').addEventListener('click', exportToExcel);
