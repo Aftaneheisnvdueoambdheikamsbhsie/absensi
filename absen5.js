@@ -1,17 +1,17 @@
-let attendanceData = [];
-let workbookGlobal; // Menyimpan workbook secara global
-let currentSheetName = ''; // Nama sheet yang dipilih
 
-// Fungsi untuk toggle burger menu
+let attendanceData = [];
+let currentSheetName = 'Kelas3'; // Default sheet
+
+// Fungsi untuk toggle menu
 function toggleMenu() {
     const menu = document.getElementById('navMenu');
     menu.classList.toggle('nav-hidden');
 }
 
-// Fungsi untuk memilih sheet dan merender data
+// Fungsi untuk memilih sheet
 function selectSheet(sheetName) {
     currentSheetName = sheetName;
-    loadSheet(workbookGlobal, currentSheetName); // Muat sheet yang dipilih
+    renderTable(); // Render ulang tabel untuk sheet yang dipilih
 }
 
 // Fungsi untuk membaca file Excel
@@ -26,38 +26,18 @@ function handleFile(e) {
         var data = new Uint8Array(event.target.result);
         var workbook = XLSX.read(data, { type: 'array' });
 
-        // Simpan workbook di variabel global
-        workbookGlobal = workbook;
+        // Ambil semua nama sheet secara dinamis
+        var sheetNames = workbook.SheetNames;
+        if (!sheetNames.includes(currentSheetName)) {
+            currentSheetName = sheetNames[0]; // Jika sheet tidak ditemukan, default ke sheet pertama
+        }
 
-        // Tampilkan nama-nama sheet di burger menu
-        loadSheetNames(workbook);
-
-        // Muat sheet pertama sebagai default
-        currentSheetName = workbook.SheetNames[0];
         loadSheet(workbook, currentSheetName);
     };
     reader.readAsArrayBuffer(file);
 }
 
-// Fungsi untuk menampilkan nama sheet di burger menu
-function loadSheetNames(workbook) {
-    const sheetNames = workbook.SheetNames;
-    const navMenu = document.getElementById('navMenu');
-    const ul = navMenu.querySelector('ul');
-    ul.innerHTML = ''; // Bersihkan daftar menu sebelum ditambahkan
-
-    // Tambahkan nama sheet ke menu
-    sheetNames.forEach(sheetName => {
-        const li = document.createElement('li');
-        li.innerText = sheetName;
-        li.onclick = function () {
-            selectSheet(sheetName); // Pilih sheet saat diklik
-        };
-        ul.appendChild(li); // Tambahkan nama sheet ke menu
-    });
-}
-
-// Fungsi untuk memuat data dari sheet yang dipilih
+// Fungsi untuk memuat sheet berdasarkan kelas
 function loadSheet(workbook, sheetName) {
     const sheet = workbook.Sheets[sheetName];
     if (!sheet) {
@@ -65,62 +45,38 @@ function loadSheet(workbook, sheetName) {
         return;
     }
 
-    // Convert sheet ke JSON
     const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
     updateAttendanceData(jsonData);
     renderTable();
 }
 
-// Fungsi untuk mengupdate data absensi
-function updateAttendanceData(data) {
-    attendanceData = data; // Simpan data dari sheet ke variabel
-}
-
-// Fungsi untuk merender tabel
-function renderTable() {
-    const table = document.getElementById('attendanceTable').getElementsByTagName('tbody')[0];
-    table.innerHTML = ''; // Kosongkan tabel sebelum dirender ulang
-
-    // Buat header dari baris pertama
-    const headerRow = document.createElement('tr');
-    attendanceData[0].forEach(header => {
-        const th = document.createElement('th');
-        th.textContent = header;
-        headerRow.appendChild(th);
-    });
-    table.appendChild(headerRow);
-
-    // Tambahkan data ke tabel
-    for (let i = 1; i < attendanceData.length; i++) {
-        const row = document.createElement('tr');
-        attendanceData[i].forEach(cell => {
-            const td = document.createElement('td');
-            td.textContent = cell;
-            row.appendChild(td);
-        });
-        table.appendChild(row);
-    }
-}
-
-// Fungsi untuk update kehadiran berdasarkan input acak
+// Fungsi untuk mengupdate data kehadiran berdasarkan input acak
 function updateAttendance() {
     const rawData = document.getElementById('randomData').value.trim();
-    const lines = rawData.split('\n');
+    const dateInput = document.getElementById('inputDate').value;
+    
+    if (!dateInput) {
+        alert('Silakan pilih tanggal!');
+        return;
+    }
+
+    const dateParts = dateInput.split('-'); // Memecah tanggal menjadi [YYYY, MM, DD]
     const newEntries = [];
+    const lines = rawData.split('\n');
 
     lines.forEach(line => {
         const parts = line.split(' ');
-        const name = parts.slice(1, parts.length - 1).join(' '); // Menggabungkan nama
-        const className = parts[parts.length - 1]; // Bagian terakhir adalah kelas
+        const name = parts.slice(1, parts.length - 1).join(' ');
+        const className = parts[parts.length - 1];
 
         if (name && className) {
-            newEntries.push([parts[0], name, className, 'P']); // Tanda ceklis Windings 2
+            newEntries.push([parts[0], name, className, 'P', dateParts[1], dateParts[2]]); // Menambahkan bulan dan tanggal
         }
     });
 
     // Tambahkan data baru ke attendanceData
     newEntries.forEach(row => {
-        const existingIndex = attendanceData.findIndex(entry => entry[1] === row[1]);
+        const existingIndex = attendanceData.findIndex(entry => entry[1] === row[1] && entry[2] === row[2]);
         if (existingIndex !== -1) {
             attendanceData[existingIndex] = row; // Update data yang sudah ada
         } else {
@@ -130,6 +86,23 @@ function updateAttendance() {
 
     renderTable(); // Render ulang tabel
 }
+
+// Fungsi untuk merender tabel
+function renderTable() {
+    const table = document.getElementById('attendanceTable').getElementsByTagName('tbody')[0];
+    table.innerHTML = ''; // Kosongkan tabel sebelum merender ulang
+
+    attendanceData
+        .filter(row => row[2].startsWith(currentSheetName.slice(5))) // Hanya tampilkan data untuk kelas yang dipilih
+        .forEach((row, index) => {
+            const newRow = table.insertRow();
+            newRow.insertCell().textContent = index + 1; // Nomor
+            row.forEach(cell => {
+                const newCell = newRow.insertCell();
+                newCell.textContent = cell;
+            });
+       
+
 
 // Fungsi untuk men-download file Excel yang sudah di-update
 function exportToExcel() {
