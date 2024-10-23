@@ -156,7 +156,13 @@ function updateAttendance() {
 
 // Fungsi untuk menambahkan kolom tanggal dan "P" secara vertikal di bawah kolom tanggal yang baru
 function updateAttendanceDataWithNewEntries(newEntries) {
-    const currentDate = new Date().toLocaleDateString(); // Mendapatkan tanggal hari ini
+    // Ambil tanggal dari input tanggal yang dipilih
+    const currentDate = document.getElementById('datePicker').value; // Ganti 'datePicker' dengan ID elemen input tanggal Anda
+    if (!currentDate) {
+        alert("Tanggal tidak valid! Silakan pilih tanggal.");
+        return;
+    }
+
     let dateIndex = attendanceData[0].indexOf(currentDate); // Cari apakah tanggal sudah ada
 
     // Jika kolom tanggal belum ada, tambahkan kolom baru
@@ -197,6 +203,7 @@ function updateAttendanceDataWithNewEntries(newEntries) {
         exportToExcel();
     }
 }
+
 
 // Fungsi untuk men-download file Excel yang sudah di-update
 function exportToExcel() {
