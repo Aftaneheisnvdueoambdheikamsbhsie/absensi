@@ -1,6 +1,7 @@
 // Variabel untuk menyimpan data dan sheet yang dipilih
 let attendanceData = [];
 let currentSheetName = ''; // Nama sheet yang dipilih
+let currentWorkbook = null; // Variabel global untuk menyimpan workbook yang diupload
 
 // Fungsi untuk membaca file Excel
 document.getElementById('upload').addEventListener('change', handleFile, false);
@@ -12,14 +13,14 @@ function handleFile(e) {
     var reader = new FileReader();
     reader.onload = function (event) {
         var data = new Uint8Array(event.target.result);
-        var workbook = XLSX.read(data, { type: 'array' });
+        currentWorkbook = XLSX.read(data, { type: 'array' });
 
         // Tampilkan nama-nama sheet yang ada
-        loadSheetNames(workbook);
+        loadSheetNames(currentWorkbook);
 
         // Muat sheet pertama secara default
-        currentSheetName = workbook.SheetNames[0];
-        loadSheet(workbook, currentSheetName);
+        currentSheetName = currentWorkbook.SheetNames[0];
+        loadSheet(currentWorkbook, currentSheetName);
     };
     reader.readAsArrayBuffer(file);
 }
@@ -57,7 +58,7 @@ function loadSheet(workbook, sheetName) {
     }
 
     // Ambil data sheet dan informasi merge
-    var jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: true });
+    var jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: true, defval: '' }); // Tambahkan defval untuk menangani sel kosong
     var merges = sheet['!merges'] || []; // Ambil informasi merge jika ada
 
     // Update attendance data dengan data dari sheet
