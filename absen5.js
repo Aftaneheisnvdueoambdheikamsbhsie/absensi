@@ -154,22 +154,34 @@ function updateAttendance() {
     updateAttendanceDataWithNewEntries(newEntries);
 }
 
-// Fungsi untuk menambahkan kolom bulan, tanggal, dan centang "P" secara otomatis
+// Fungsi untuk menambahkan kolom tanggal dan "P" secara vertikal di bawah kolom tanggal yang baru
 function updateAttendanceDataWithNewEntries(newEntries) {
     const currentDate = new Date().toLocaleDateString(); // Mendapatkan tanggal hari ini
+    const dateIndex = attendanceData[0].indexOf(currentDate);
 
+    // Jika kolom tanggal belum ada, tambahkan kolom baru
+    if (dateIndex === -1) {
+        attendanceData[0].push(currentDate); // Tambahkan kolom tanggal di header
+        attendanceData.forEach((row, rowIndex) => {
+            if (rowIndex > 0) row.push(''); // Tambahkan sel kosong di bawah tanggal yang baru
+        });
+    }
+
+    // Update setiap entri berdasarkan pencocokan fuzzy nama dan kelas
     newEntries.forEach(row => {
         let updated = false;
         for (let i = 1; i < attendanceData.length; i++) {
             if (fuzzyMatch(attendanceData[i][0], row[0]) && fuzzyMatch(attendanceData[i][1], row[1])) {
-                attendanceData[i].push('P', currentDate); // Tambahkan centang "P" dan tanggal
+                attendanceData[i][attendanceData[0].length - 1] = 'P'; // Tambahkan "P" di bawah kolom tanggal baru
                 updated = true;
                 break;
             }
         }
         if (!updated) {
-            let newRow = Array(attendanceData[0].length - 3).fill('');
-            newRow.unshift(row[0], row[1], 'P', currentDate); // Tambahkan kolom untuk nama, kelas, dan kehadiran
+            let newRow = Array(attendanceData[0].length).fill('');
+            newRow[0] = row[0]; // Nama
+            newRow[1] = row[1]; // Kelas
+            newRow[attendanceData[0].length - 1] = 'P'; // Kehadiran
             attendanceData.push(newRow);
         }
     });
