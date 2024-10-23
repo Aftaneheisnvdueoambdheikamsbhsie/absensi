@@ -116,8 +116,8 @@ function renderTableWithMerge(data, merges) {
 
 // Fungsi untuk mencocokkan string secara fuzzy
 function fuzzyMatch(studentName, className) {
-    // Menyesuaikan fuzzy matching agar lebih robust
-    return studentName.toLowerCase().trim() === className.toLowerCase().trim();
+    // Menyesuaikan fuzzy matching agar lebih robust dengan matching sebagian
+    return studentName.toLowerCase().trim().includes(className.toLowerCase().trim());
 }
 
 // Fungsi untuk mengupdate data absensi secara acak dengan pencocokan nama dan kelas
@@ -158,7 +158,7 @@ function updateAttendance() {
 // Fungsi untuk menambahkan kolom tanggal dan "P" secara vertikal di bawah kolom tanggal yang baru
 function updateAttendanceDataWithNewEntries(newEntries) {
     // Ambil tanggal dari input tanggal yang dipilih
-    const currentDate = document.getElementById('datePicker').value; // Ganti 'datePicker' dengan ID elemen input tanggal Anda
+    const currentDate = document.getElementById('datePicker').value; 
     if (!currentDate) {
         alert("Tanggal tidak valid! Silakan pilih tanggal.");
         return;
