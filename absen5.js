@@ -121,7 +121,10 @@ function fuzzyMatch(studentName, className) {
 }
 
 // Fungsi untuk mengupdate data absensi secara acak dengan pencocokan nama dan kelas
-document.getElementById('updateAttendanceBtn').addEventListener('click', updateAttendance);
+document.getElementById('updateAttendanceBtn').addEventListener('click', function () {
+    console.log('Button Clicked'); // Log untuk melihat apakah button bekerja
+    updateAttendance();
+});
 
 function updateAttendance() {
     console.log('Update Attendance button clicked');
@@ -130,6 +133,7 @@ function updateAttendance() {
         alert("Tidak ada data yang dimasukkan!");
         return;
     }
+
     const lines = rawData.split('\n');
     const newEntries = [];
 
@@ -159,6 +163,7 @@ function updateAttendance() {
 function updateAttendanceDataWithNewEntries(newEntries) {
     // Ambil tanggal dari input tanggal yang dipilih
     const currentDate = document.getElementById('datePicker').value; 
+    console.log('Current Date:', currentDate); // Log untuk cek apakah tanggal terpilih
     if (!currentDate) {
         alert("Tanggal tidak valid! Silakan pilih tanggal.");
         return;
