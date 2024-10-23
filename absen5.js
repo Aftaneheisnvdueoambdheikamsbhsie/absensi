@@ -215,4 +215,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const navMenu = document.getElementById('navMenu');
         navMenu.classList.toggle('nav-hidden');
     }
+
+    // Menambahkan event listener untuk burger menu
+    document.querySelector('.burger-menu').addEventListener('click', toggleMenu);
 });
