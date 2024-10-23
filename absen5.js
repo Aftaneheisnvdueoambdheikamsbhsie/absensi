@@ -57,7 +57,7 @@ function loadSheet(workbook, sheetName) {
     }
 
     // Ambil data sheet dan informasi merge
-    var jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+    var jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: true });
     var merges = sheet['!merges'] || []; // Ambil informasi merge jika ada
 
     // Update attendance data dengan data dari sheet
