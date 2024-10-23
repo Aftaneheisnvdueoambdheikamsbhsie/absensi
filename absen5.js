@@ -116,7 +116,8 @@ function renderTableWithMerge(data, merges) {
 
 // Fungsi untuk mencocokkan string secara fuzzy
 function fuzzyMatch(studentName, className) {
-    return studentName.toLowerCase().includes(className.toLowerCase()) || className.toLowerCase().includes(studentName.toLowerCase());
+    // Menyesuaikan fuzzy matching agar lebih robust
+    return studentName.toLowerCase().trim() === className.toLowerCase().trim();
 }
 
 // Fungsi untuk mengupdate data absensi secara acak dengan pencocokan nama dan kelas
@@ -203,7 +204,6 @@ function updateAttendanceDataWithNewEntries(newEntries) {
         exportToExcel();
     }
 }
-
 
 // Fungsi untuk men-download file Excel yang sudah di-update
 function exportToExcel() {
