@@ -115,88 +115,92 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Fungsi untuk mencocokkan string secara fuzzy
-    function fuzzyMatch(studentName, className) {
-        if (typeof studentName !== 'string' || typeof className !== 'string') {
-            return false; // Pastikan bahwa keduanya adalah string
-        }
-        return studentName.toLowerCase().trim().includes(className.toLowerCase().trim());
+
+    // Fungsi untuk normalisasi string
+function normalizeString(str) {
+    return str.trim().toLowerCase(); // Menghapus spasi dan mengubah menjadi huruf kecil
+}
+
+// Fungsi untuk mencocokkan string secara fuzzy
+function fuzzyMatch(studentName, className) {
+    const normalizedName = normalizeString(studentName);
+    const normalizedClassName = normalizeString(className);
+
+    // Cek apakah nama siswa mengandung nama kelas
+    return normalizedName.includes(normalizedClassName);
+}
+
+// Fungsi untuk mengupdate data absensi secara acak dengan pencocokan nama dan kelas
+document.getElementById('updateAttendanceBtn').addEventListener('click', function () {
+    updateAttendance();
+});
+
+function updateAttendance() {
+    const rawData = document.getElementById('randomData').value.trim();
+    if (!rawData) {
+        alert("Tidak ada data yang dimasukkan!");
+        return;
     }
 
-    // Fungsi untuk mengupdate data absensi secara acak dengan pencocokan nama dan kelas
-    document.getElementById('updateAttendanceBtn').addEventListener('click', function () {
-        updateAttendance();
+    const lines = rawData.split('\n');
+    const newEntries = [];
+
+    // Proses data acak yang diinput
+    lines.forEach(line => {
+        const parts = line.trim().split(/\s+/);
+        if (parts.length < 2) {
+            console.warn('Data tidak lengkap:', line); // Ganti console.error dengan console.warn
+            return;
+        }
+        const className = parts.pop(); // Kelas selalu di bagian akhir
+        const name = parts.join(' '); // Gabungkan kembali nama siswa yang terpecah
+        if (name && className) {
+            newEntries.push([name, className]);
+        }
     });
 
-    function updateAttendance() {
-        const rawData = document.getElementById('randomData').value.trim();
-        if (!rawData) {
-            alert("Tidak ada data yang dimasukkan!");
-            return;
-        }
-
-        const lines = rawData.split('\n');
-        const newEntries = [];
-
-        // Proses data acak yang diinput
-        lines.forEach(line => {
-            const parts = line.trim().split(/\s+/);
-            if (parts.length < 2) {
-                console.warn('Data tidak lengkap:', line); // Ganti console.error dengan console.warn
-                return;
-            }
-            const className = parts.pop(); // Kelas selalu di bagian akhir
-            const name = parts.join(' '); // Gabungkan kembali nama siswa yang terpecah
-            if (name && className) {
-                newEntries.push([name, className]);
-            }
-        });
-
-        if (newEntries.length === 0) {
-            alert('Data yang dimasukkan tidak valid');
-            return;
-        }
-
-        updateAttendanceDataWithNewEntries(newEntries);
+    if (newEntries.length === 0) {
+        alert('Data yang dimasukkan tidak valid');
+        return;
     }
 
-    // Fungsi untuk menambahkan kolom tanggal dan "P" secara vertikal di bawah kolom tanggal yang baru
-    function updateAttendanceDataWithNewEntries(newEntries) {
-        const currentDate = document.getElementById('datePicker').value; 
-        if (!currentDate) {
-            alert("Tanggal tidak valid! Silakan pilih tanggal.");
-            return;
-        }
+    updateAttendanceDataWithNewEntries(newEntries);
+}
 
-        let dateIndex = attendanceData[0].indexOf(currentDate); 
-
-        if (dateIndex === -1) {
-            attendanceData[0].push(currentDate); 
-            dateIndex = attendanceData[0].length - 1;
-            attendanceData.forEach((row, rowIndex) => {
-                if (rowIndex > 0) row.push(''); 
-            });
-        }
-
-        newEntries.forEach(row => {
-            let updated = false;
-            for (let i = 1; i < attendanceData.length; i++) { 
-                // Memastikan pencocokan huruf kecil
-                if (fuzzyMatch(attendanceData[i][0].toLowerCase(), row[0].toLowerCase()) && 
-                    fuzzyMatch(attendanceData[i][1].toLowerCase(), row[1].toLowerCase())) {
-                    attendanceData[i][dateIndex] = 'P'; 
-                    updated = true;
-                    break;
-                }
-            }
-
-            if (!updated) {
-                console.log("Tidak ditemukan kecocokan untuk:", row);
-            }
-        });
-
-        renderTableWithMerge(attendanceData, []);
+function updateAttendanceDataWithNewEntries(newEntries) {
+    const currentDate = document.getElementById('datePicker').value; 
+    if (!currentDate) {
+        alert("Tanggal tidak valid! Silakan pilih tanggal.");
+        return;
     }
+
+    let dateIndex = attendanceData[0].indexOf(currentDate); 
+
+    if (dateIndex === -1) {
+        attendanceData[0].push(currentDate); 
+        dateIndex = attendanceData[0].length - 1;
+        attendanceData.forEach((row, rowIndex) => {
+            if (rowIndex > 0) row.push(''); 
+        });
+    }
+
+    newEntries.forEach(row => {
+        let updated = false;
+        for (let i = 1; i < attendanceData.length; i++) { 
+            if (fuzzyMatch(attendanceData[i][0], row[0]) && fuzzyMatch(attendanceData[i][1], row[1])) {
+                attendanceData[i][dateIndex] = 'P'; 
+                updated = true;
+                break;
+            }
+        }
+
+        if (!updated) {
+            console.log("Tidak ditemukan kecocokan untuk:", row);
+        }
+    });
+
+    renderTableWithMerge(attendanceData, []);
+}
 
     // Fungsi untuk mengekspor file Excel yang telah diperbarui
     function exportToExcel() {
