@@ -157,42 +157,47 @@ function updateAttendance() {
 // Fungsi untuk menambahkan kolom tanggal dan "P" secara vertikal di bawah kolom tanggal yang baru
 function updateAttendanceDataWithNewEntries(newEntries) {
     const currentDate = new Date().toLocaleDateString(); // Mendapatkan tanggal hari ini
-    const dateIndex = attendanceData[0].indexOf(currentDate);
+    let dateIndex = attendanceData[0].indexOf(currentDate); // Cari apakah tanggal sudah ada
 
     // Jika kolom tanggal belum ada, tambahkan kolom baru
     if (dateIndex === -1) {
         attendanceData[0].push(currentDate); // Tambahkan kolom tanggal di header
+        dateIndex = attendanceData[0].length - 1; // Indeks kolom tanggal baru
         attendanceData.forEach((row, rowIndex) => {
-            if (rowIndex > 0) row.push(''); // Tambahkan sel kosong di bawah tanggal yang baru
+            if (rowIndex > 0) row.push(''); // Tambahkan sel kosong di bawah tanggal yang baru untuk setiap baris
         });
     }
 
     // Update setiap entri berdasarkan pencocokan fuzzy nama dan kelas
     newEntries.forEach(row => {
         let updated = false;
-        for (let i = 1; i < attendanceData.length; i++) {
+        for (let i = 1; i < attendanceData.length; i++) { // Mulai dari baris kedua, karena baris pertama adalah header
             if (fuzzyMatch(attendanceData[i][0], row[0]) && fuzzyMatch(attendanceData[i][1], row[1])) {
-                attendanceData[i][attendanceData[0].length - 1] = 'P'; // Tambahkan "P" di bawah kolom tanggal baru
+                attendanceData[i][dateIndex] = 'P'; // Tambahkan "P" di bawah kolom tanggal baru pada baris yang sesuai
                 updated = true;
                 break;
             }
         }
+        // Jika tidak ada pencocokan, tambahkan baris baru dengan data baru
         if (!updated) {
-            let newRow = Array(attendanceData[0].length).fill('');
+            let newRow = Array(attendanceData[0].length).fill(''); // Buat baris baru dengan sel kosong
             newRow[0] = row[0]; // Nama
             newRow[1] = row[1]; // Kelas
-            newRow[attendanceData[0].length - 1] = 'P'; // Kehadiran
-            attendanceData.push(newRow);
+            newRow[dateIndex] = 'P'; // Kehadiran di kolom tanggal baru
+            attendanceData.push(newRow); // Tambahkan baris baru ke data
         }
     });
 
-    renderTableWithMerge(attendanceData, []); // Render ulang tabel setelah update
+    // Render ulang tabel setelah update
+    renderTableWithMerge(attendanceData, []); 
     alert('Update attendance berhasil!');
 
+    // Tawarkan untuk mendownload file Excel yang sudah di-update
     if (confirm('Ingin mendownload file terupdate?')) {
-        exportToExcel(); // Tawarkan untuk download file Excel yang di-update
+        exportToExcel();
     }
 }
+
 
 // Fungsi untuk men-download file Excel yang sudah di-update
 function exportToExcel() {
