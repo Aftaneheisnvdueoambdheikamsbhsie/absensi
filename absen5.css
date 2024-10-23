@@ -57,6 +57,20 @@ nav ul li:hover {
 main {
     padding: 2rem;
 }
+#attendanceTable {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+#attendanceTable th, #attendanceTable td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+#attendanceTable th {
+    background-color: #f2f2f2;
+}
 
 /* Section untuk upload file, input data, dan tabel */
 .upload-section, 
