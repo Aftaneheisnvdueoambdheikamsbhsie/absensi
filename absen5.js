@@ -198,7 +198,6 @@ function updateAttendanceDataWithNewEntries(newEntries) {
     }
 }
 
-
 // Fungsi untuk men-download file Excel yang sudah di-update
 function exportToExcel() {
     var table = document.getElementById('attendanceTable');
