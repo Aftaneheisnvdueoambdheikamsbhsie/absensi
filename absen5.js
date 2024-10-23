@@ -64,41 +64,38 @@ function loadSheet(workbook, sheetName) {
     updateAttendanceData(jsonData);
 
     // Render data ke dalam tabel HTML dengan merge cell jika perlu
-    renderTableWithMerge(merges);
-}
-
-// Fungsi untuk mengupdate attendance data
-function updateAttendanceData(data) {
-    attendanceData = data; // Simpan data dari sheet ke variabel
+    renderTableWithMerge(jsonData, merges);
 }
 
 // Fungsi untuk menampilkan data di tabel HTML dengan merge cell
-function renderTableWithMerge(merges) {
+function renderTableWithMerge(data, merges) {
     var table = document.getElementById('attendanceTable');
-    var thead = table.querySelector('thead tr');
+    var thead = table.querySelector('thead');
     var tbody = table.querySelector('tbody');
 
     // Hapus semua baris di tabel sebelum render ulang
     thead.innerHTML = '';
     tbody.innerHTML = '';
 
-    // Tambahkan header dari baris pertama Excel
-    attendanceData[0].forEach(function (col) {
+    // Buat elemen baris header
+    var headerRow = document.createElement('tr');
+    data[0].forEach(function (col) {
         var th = document.createElement('th');
         th.innerText = col;
-        thead.appendChild(th);
+        headerRow.appendChild(th);
     });
+    thead.appendChild(headerRow);
 
-    // Tambahkan baris data dan terapkan merge
-    for (var i = 1; i < attendanceData.length; i++) {
+    // Render data tabel dan terapkan merge cell
+    for (var i = 1; i < data.length; i++) {
         var row = document.createElement('tr');
-        attendanceData[i].forEach(function (cell, index) {
+        data[i].forEach(function (cell, colIndex) {
             var td = document.createElement('td');
             td.innerText = cell;
 
-            // Cek apakah kolom ini merupakan bagian dari merge
+            // Cek apakah sel ini merupakan bagian dari merge
             merges.forEach(function (merge) {
-                if (merge.s.r === i && merge.s.c === index) {
+                if (merge.s.r === i && merge.s.c === colIndex) {
                     td.setAttribute('rowspan', merge.e.r - merge.s.r + 1);
                     td.setAttribute('colspan', merge.e.c - merge.s.c + 1);
                 }
