@@ -62,10 +62,8 @@ function loadSheet(workbook, sheetName) {
     var merges = sheet['!merges'] || []; // Ambil informasi merge jika ada
 
     // Update attendance data dengan data dari sheet
-    updateAttendanceData(jsonData);
-
-    // Render data ke dalam tabel HTML dengan merge cell jika perlu
-    renderTableWithMerge(jsonData, merges);
+    attendanceData = jsonData; // Simpan data di variabel global
+    renderTableWithMerge(jsonData, merges); // Render tabel dengan merge
 }
 
 // Fungsi untuk menampilkan data di tabel HTML dengan merge cell
@@ -80,21 +78,29 @@ function renderTableWithMerge(data, merges) {
 
     // Buat elemen baris header
     var headerRow = document.createElement('tr');
-    data[0].forEach(function (col) {
+    data[0].forEach(function (col, colIndex) {
         var th = document.createElement('th');
         th.innerText = col;
         headerRow.appendChild(th);
+
+        // Cek jika sel ini merupakan bagian dari merge
+        merges.forEach(function (merge) {
+            if (merge.s.r === 1 && merge.s.c === colIndex) {
+                th.setAttribute('rowspan', merge.e.r - merge.s.r + 1);
+                th.setAttribute('colspan', merge.e.c - merge.s.c + 1);
+            }
+        });
     });
     thead.appendChild(headerRow);
 
-    // Render data tabel dan terapkan merge cell
+    // Render data tabel dan terapkan merge cell di bagian body
     for (var i = 1; i < data.length; i++) {
         var row = document.createElement('tr');
         data[i].forEach(function (cell, colIndex) {
             var td = document.createElement('td');
             td.innerText = cell;
 
-            // Cek apakah sel ini merupakan bagian dari merge
+            // Cek apakah sel ini bagian dari merge
             merges.forEach(function (merge) {
                 if (merge.s.r === i && merge.s.c === colIndex) {
                     td.setAttribute('rowspan', merge.e.r - merge.s.r + 1);
@@ -148,31 +154,31 @@ function updateAttendance() {
     updateAttendanceDataWithNewEntries(newEntries);
 }
 
+// Fungsi untuk menambahkan kolom bulan, tanggal, dan centang "P" secara otomatis
 function updateAttendanceDataWithNewEntries(newEntries) {
     const currentDate = new Date().toLocaleDateString(); // Mendapatkan tanggal hari ini
 
     newEntries.forEach(row => {
-    let updated = false;
-    for (let i = 1; i < attendanceData.length; i++) {
-        // Memanggil fuzzyMatch dengan nama dan kelas yang sesuai
-        if (fuzzyMatch(attendanceData[i][0], row[0]) && fuzzyMatch(attendanceData[i][1], row[1])) {
-            attendanceData[i].push('P', currentDate);
-            updated = true;
-            break;
+        let updated = false;
+        for (let i = 1; i < attendanceData.length; i++) {
+            if (fuzzyMatch(attendanceData[i][0], row[0]) && fuzzyMatch(attendanceData[i][1], row[1])) {
+                attendanceData[i].push('P', currentDate); // Tambahkan centang "P" dan tanggal
+                updated = true;
+                break;
+            }
         }
-    }
-    if (!updated) {
-        let newRow = Array(attendanceData[0].length - 3).fill(''); 
-        newRow.unshift(row[0], row[1], 'P', currentDate); // Tambahkan tanggal
-        attendanceData.push(newRow);
-    }
-});
+        if (!updated) {
+            let newRow = Array(attendanceData[0].length - 3).fill('');
+            newRow.unshift(row[0], row[1], 'P', currentDate); // Tambahkan kolom untuk nama, kelas, dan kehadiran
+            attendanceData.push(newRow);
+        }
+    });
 
-    renderTableWithMerge([]); // Render ulang tabel setelah update
+    renderTableWithMerge(attendanceData, []); // Render ulang tabel setelah update
     alert('Update attendance berhasil!');
 
     if (confirm('Ingin mendownload file terupdate?')) {
-        exportToExcel();
+        exportToExcel(); // Tawarkan untuk download file Excel yang di-update
     }
 }
 
