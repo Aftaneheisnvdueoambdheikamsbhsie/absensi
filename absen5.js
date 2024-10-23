@@ -181,7 +181,9 @@ document.addEventListener("DOMContentLoaded", function () {
         newEntries.forEach(row => {
             let updated = false;
             for (let i = 1; i < attendanceData.length; i++) { 
-                if (fuzzyMatch(attendanceData[i][0], row[0]) && fuzzyMatch(attendanceData[i][1], row[1])) {
+                // Memastikan pencocokan huruf kecil
+                if (fuzzyMatch(attendanceData[i][0].toLowerCase(), row[0].toLowerCase()) && 
+                    fuzzyMatch(attendanceData[i][1].toLowerCase(), row[1].toLowerCase())) {
                     attendanceData[i][dateIndex] = 'P'; 
                     updated = true;
                     break;
