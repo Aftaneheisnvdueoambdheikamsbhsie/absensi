@@ -3,9 +3,13 @@ let attendanceData = [];
 let currentSheetName = ''; 
 let currentWorkbook = null;
 
-// Fungsi untuk membaca file Excel
-document.getElementById('upload').addEventListener('change', handleFile, false);
+document.addEventListener("DOMContentLoaded", function() {
+    // Fungsi untuk membaca file Excel
+    document.getElementById('upload').addEventListener('change', handleFile, false);
+    document.getElementById('updateAttendanceBtn').addEventListener('click', updateAttendance);
+});
 
+// Fungsi untuk membaca file Excel
 function handleFile(e) {
     var files = e.target.files;
     var file = files[0];
@@ -103,7 +107,7 @@ function renderTableWithMerge(data, merges) {
     }
 }
 
-// Fungsi Levenshtein Distance untuk mencocokkan nama dan kelas
+// Fungsi untuk mencocokkan nama dan kelas berdasarkan Levenshtein Distance
 function levenshteinDistance(a, b) {
     const matrix = Array.from({ length: a.length + 1 }, (_, i) =>
         Array.from({ length: b.length + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0))
@@ -125,7 +129,6 @@ function levenshteinDistance(a, b) {
     return matrix[a.length][b.length];
 }
 
-// Fungsi untuk mencocokkan nama dan kelas berdasarkan Levenshtein Distance
 function levenshteinMatch(studentName, className, inputName, inputClass) {
     const nameDistance = levenshteinDistance(studentName.toLowerCase(), inputName.toLowerCase());
     const classDistance = levenshteinDistance(className.toLowerCase(), inputClass.toLowerCase());
@@ -136,9 +139,7 @@ function levenshteinMatch(studentName, className, inputName, inputClass) {
     return nameDistance <= nameThreshold && classDistance <= classThreshold;
 }
 
-// Fungsi untuk memperbarui data absensi berdasarkan pencocokan nama dan kelas
-document.getElementById('updateAttendanceBtn').addEventListener('click', updateAttendance);
-
+// Fungsi untuk memperbarui data absensi
 function updateAttendance() {
     const rawData = document.getElementById('randomData').value.trim();
     if (!rawData) {
@@ -162,57 +163,16 @@ function updateAttendance() {
         }
     });
 
-    if (newEntries.length === 0) {
-        alert('Data yang dimasukkan tidak valid');
-        return;
-    }
-
-    updateAttendanceDataWithNewEntries(newEntries);
-}
-
-// Fungsi untuk menambahkan kolom tanggal dan memperbarui "P" di baris yang cocok
-function updateAttendanceDataWithNewEntries(newEntries) {
-    const currentDate = document.getElementById('datePicker').value;
-    if (!currentDate) {
-        alert("Tanggal tidak valid! Silakan pilih tanggal.");
-        return;
-    }
-
-    let dateIndex = attendanceData[0].indexOf(currentDate);
-
-    if (dateIndex === -1) {
-        attendanceData[0].push(currentDate);
-        dateIndex = attendanceData[0].length - 1;
-        attendanceData.forEach((row, rowIndex) => {
-            if (rowIndex > 0) row.push('');
-        });
-    }
-
-    newEntries.forEach(row => {
-        for (let i = 1; i < attendanceData.length; i++) {
-            if (levenshteinMatch(attendanceData[i][0], attendanceData[i][1], row[0], row[1])) {
-                attendanceData[i][dateIndex] = 'P';
-            }
+    newEntries.forEach(newEntry => {
+        const matched = attendanceData.find(row =>
+            levenshteinMatch(row[0], row[1], newEntry[0], newEntry[1])
+        );
+        if (matched) {
+            matched.push('✔'); 
+        } else {
+            console.log('Tidak cocok:', newEntry);
         }
     });
 
-    renderTableWithMerge(attendanceData, []); 
-    alert('Update attendance berhasil!');
-
-    if (confirm('Ingin mendownload file terupdate?')) {
-        exportToExcel();
-    }
-}
-
-// Fungsi untuk men-download file Excel yang sudah di-update
-function exportToExcel() {
-    var table = document.getElementById('attendanceTable');
-    var wb = XLSX.utils.table_to_book(table, { sheet: "Attendance" });
-    XLSX.writeFile(wb, 'updated_attendance.xlsx');
-}
-
-// Fungsi untuk toggle menu
-function toggleMenu() {
-    const menu = document.getElementById('navMenu');
-    menu.classList.toggle('nav-hidden');
+    renderTableWithMerge(attendanceData);
 }
