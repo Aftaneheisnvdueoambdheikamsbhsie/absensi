@@ -108,6 +108,9 @@ button {
 button:hover {
     background-color: #0056b3;
 }
+.wingdings2 {
+    font-family: "Wingdings 2";
+}
 
 /* Tabel data */
 table {
